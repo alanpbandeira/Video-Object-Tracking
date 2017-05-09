@@ -3,17 +3,17 @@ import numpy as np
 
 from . import img_processing as ipro
 from ..math_component import operations as op
-from .patch import OBJPatch, ScenePatch, ColorModel
+from .color_model import OBJPatch, ScenePatch, ColorModel
 
 
-class Patcher(object):
+class ColorDescriptor(object):
     """docstring for CVIMGData."""
 
     def __init__(self, clusterer="simple", bins=8, colors=None):
-        super(Patcher, self).__init__()
+        super(ColorDescriptor, self).__init__()
         # Video Frame
         self.img = None
-        
+
         # Delta width from object rect to bkgd rect
         self.delta = None
         # Extracted patches
@@ -22,7 +22,7 @@ class Patcher(object):
         self.scn_data = None
         # Color models
         self.color_model = None
-        
+
         # Selected points
         self.slct_points = []
         # Patch selected regions (points)
@@ -58,7 +58,7 @@ class Patcher(object):
                     point[0][0]:point[1][0] + 1]
 
                 self.obj_data = OBJPatch(obj_patch, point)
-    
+
     def data_extract(self):
         """docstring"""
 
@@ -69,7 +69,7 @@ class Patcher(object):
                 # Points enclosing object patch. 
                 scn_pnts = self.bkgd_selections[idx]
                 obj_pnts = self.selections[idx]
-                
+
                 # Calculate object dimensions
                 obj_width = obj_pnts[1][0] - obj_pnts[0][0]
                 obj_height = obj_pnts[1][1] - obj_pnts[0][1]
@@ -101,31 +101,31 @@ class Patcher(object):
                 # Extract the quantized object patch
                 if qnt_roi is not None:
                     qtnz_obj_patch =  qnt_roi[
-                        delta:delta+obj_height,
-                        delta:delta+obj_width
+                        self.delta:(self.delta + obj_height),
+                        self.delta:(self.delta + obj_width)
                     ]
                 else:
                     qtnz_obj_patch = None
-              
+
                 # Extract objects quantized data
                 patch_data = temp_data[
-                    delta:(delta+obj_height),
-                    delta:(delta+obj_width)
+                    self.delta:(self.delta + obj_height),
+                    self.delta:(self.delta + obj_width)
                 ]
 
                 patch_data = patch_data.reshape(obj_width*obj_height)
 
                 # Extract backgrounds quantized data
-                top = temp_data[ :delta + 1, : ]
-                bot = temp_data[ temp_data.shape[0]-delta:, :]
+                top = temp_data[ :self.delta + 1, : ]
+                bot = temp_data[ temp_data.shape[0] - self.delta:, :]
+
                 left = temp_data[ 
-                    delta:temp_data.shape[0] - delta + 1, 
-                    :delta 
-                ]
+                    self.delta:temp_data.shape[0] - self.delta + 1, 
+                    :self.delta ]
+
                 right = temp_data[ 
-                    delta:temp_data.shape[0] - delta + 1, 
-                    temp_data.shape[1]-delta:
-                ]
+                    self.delta:temp_data.shape[0] - self.delta + 1, 
+                    temp_data.shape[1] - self.delta: ]
 
                 top = top.reshape(top.shape[0]*top.shape[1])
                 bot = bot.reshape(bot.shape[0]*bot.shape[1])
@@ -133,10 +133,10 @@ class Patcher(object):
                 right = right.reshape(right.shape[0]*right.shape[1])
 
                 bkgd_data = np.concatenate((top, bot, left, right))
-                
+
                 # Store patch data and quantized versions
-                self.scn_data = ScenePatch(
-                    scn_pnts, delta, scn_roi, qnt_roi, qtnz_obj_patch)
+                # self.scn_data = ScenePatch(
+                #     scn_pnts, self.delta, scn_roi, qnt_roi, qtnz_obj_patch)
                 
                 self.color_model = ColorModel(
                     patch_data, bkgd_data, self.colors, qtnz_obj_patch)
