@@ -52,14 +52,15 @@ class ColorModel(object):
         mask_data = []
 
         for data in self.obj_features:
-            if data >= len(self.llr):
-                print(data)
+            # if data >= len(self.llr):
+            #     print(data)
             if self.llr[data] > t:
                 mask_data.append([1.0, 1.0, 1.0])
             else:
                 mask_data.append([0.0, 0.0, 0.0])
 
-        mask_map = np.array(mask_data).reshape((self.obj_dim[0], self.obj_dim[1], 3))
+        mask_map = np.array(mask_data).reshape(
+            (self.obj_dim[0], self.obj_dim[1], 3))
 
         self.bitmask_map = mask_map
 

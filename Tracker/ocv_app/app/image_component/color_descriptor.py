@@ -3,7 +3,7 @@ import numpy as np
 
 from . import img_processing as ipro
 from ..math_component import operations as op
-from .color_model import OBJPatch, ScenePatch, ColorModel
+from .color_model import ColorModel
 
 
 class ColorDescriptor(object):
