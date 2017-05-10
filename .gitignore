@@ -3,6 +3,8 @@
 
 # Exclude visual studio code metadata
 /Tracker/ocv_app/.vscode
+/Tracker/.vscode
+/Tracker/.idea
 
 # Exclude python cache
 /Tracker/ocv_app/__pycache__

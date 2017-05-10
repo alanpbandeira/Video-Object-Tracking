@@ -7,12 +7,10 @@ from .color_model import ColorModel
 
 
 class ColorDescriptor(object):
-    """docstring for CVIMGData."""
+    """docstring for ColorDescriptor."""
 
     def __init__(self, clusterer="simple", bins=8, colors=None):
         super(ColorDescriptor, self).__init__()
-        # Video Frame
-        self.img = None
 
         # Delta width from object rect to bkgd rect
         self.delta = None
@@ -22,7 +20,6 @@ class ColorDescriptor(object):
         self.scn_data = None
         # Color models
         self.color_model = None
-
         # Selected points
         self.slct_points = []
         # Patch selected regions (points)
@@ -39,31 +36,21 @@ class ColorDescriptor(object):
         # Kmeans quantization colors
         self.colors = colors
 
-    def load_img(self, img):
-        """
-        Store an image file from the provided parameter.
-        :param img_path: path to the image file.
-        :return:
-        """
-        self.img = np.copy(img)
-
-    def patch_extract(self):
+    def patch_extract(self, img):
         """docstring"""
 
         if self.selections:
-
             for point in self.selections:
-                obj_patch = self.img[
+                obj_patch = img[
                     point[0][1]:point[1][1] + 1, 
                     point[0][0]:point[1][0] + 1]
 
                 self.obj_data = OBJPatch(obj_patch, point)
 
-    def data_extract(self):
+    def data_extract(self, img):
         """docstring"""
 
         if self.selections:
-
             for idx in range(len(self.bkgd_selections)):
                 # Points enclosing background and object patch.
                 # Points enclosing object patch. 
@@ -78,7 +65,7 @@ class ColorDescriptor(object):
                 delta = op.calc_delta(obj_width, obj_height)
 
                 # Extract the scene (object + background) from the image.
-                scn_roi = self.img[
+                scn_roi = img[
                     scn_pnts[0][1]:scn_pnts[1][1] + 1,
                     scn_pnts[0][0]:scn_pnts[1][0] + 1
                 ]
@@ -134,9 +121,5 @@ class ColorDescriptor(object):
 
                 bkgd_data = np.concatenate((top, bot, left, right))
 
-                # Store patch data and quantized versions
-                # self.scn_data = ScenePatch(
-                #     scn_pnts, self.delta, scn_roi, qnt_roi, qtnz_obj_patch)
-                
                 self.color_model = ColorModel(
                     patch_data, bkgd_data, self.colors, qtnz_obj_patch)

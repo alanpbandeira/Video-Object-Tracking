@@ -43,7 +43,6 @@ class Tracker(object):
             return
 
         self.frame = imutils.resize(self.frame, width=600)
-        self.dscpt.load_img(self.frame)
 
         cv2.imshow('window', self.frame)
 
@@ -69,8 +68,7 @@ class Tracker(object):
                 # except:
                 #     print("No object found!")
 
-                # self.dscpt.patch_extract()
-                self.dscpt.data_extract()
+                self.dscpt.data_extract(self.frame)
                 print("done")
 
             if key == ord("t"):
@@ -96,7 +94,6 @@ class Tracker(object):
         frame_count = 1
 
         while True:
-            # print("new frame")
             (grabbed, t_frame) = t_camera.read()
 
             if self.args.get("video") and not grabbed:
@@ -104,12 +101,10 @@ class Tracker(object):
                 break
 
             t_frame = imutils.resize(t_frame, width=600)
-            t_dscpt.load_img(t_frame)
             view_frame = np.copy(t_frame)
 
             # Run for the first frame
             if frame_count == 1:
-
                 t_dscpt.slct_points = self.dscpt.slct_points.copy()
                 t_dscpt.selections = self.dscpt.selections.copy()
                 t_dscpt.bkgd_selections = self.dscpt.bkgd_selections.copy()
@@ -120,8 +115,7 @@ class Tracker(object):
 
                 slct_pnts = op.calc_diag_rect(p, q)
 
-                t_dscpt.patch_extract()
-                t_dscpt.data_extract()
+                t_dscpt.data_extract(t_frame)
 
                 cv2.rectangle(
                     view_frame, slct_pnts[0], slct_pnts[1], ((255, 0, 0)), 1)
@@ -134,8 +128,7 @@ class Tracker(object):
                         break
 
                     try:
-                        # t_dscpt.patch_extract()
-                        t_dscpt.data_extract()
+                        t_dscpt.data_extract(t_frame)
                     except:
                         break
 
