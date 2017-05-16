@@ -51,16 +51,31 @@ class PositionDescriptor(object):
             pos_data = sorted([tuple(y) for x in indices for y in x])
 
             vfunc = np.vectorize(op.pnt_dist)
-            dis_data = vfunc(pos_data, centroid)
+            dist_data = vfunc(pos_data, centroid)
 
-            max_dist = max(dis_data)
+            max_dist = max(dist_data)
 
             sectors = self.set_sectors(max_dist)
            
-            radius = sum(dis_data) / len(dis_data)
+            radius = sum(dist_data) / len(dist_data)
+
+            sector_data = []
+
+            for dist in dist_data:
+                for sec_range in sorted(sectors.keys()):
+                    if dist <= sec_range:
+                        sector_data.append(sectors[sec_range])
 
 
     def set_sectors(self, max_dist):
-        delta_sector = np.floor(max_dist / self.sectors)
+        """docstring"""
 
-        for x in range(0, self.bins, -1)
+        delta_sector = np.floor(max_dist / self.sectors)
+        sector_range = max_dist
+        sectors = {}
+        
+        for x in range(0, self.bins, -1):
+            sectors[sector_range] = x
+            sector_range -= delta_sector
+        
+        return sectors
