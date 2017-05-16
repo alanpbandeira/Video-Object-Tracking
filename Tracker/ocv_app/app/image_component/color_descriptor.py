@@ -14,11 +14,7 @@ class ColorDescriptor(object):
 
         # Delta width from object rect to bkgd rect
         self.delta = None
-        # Extracted patches
-        self.obj_data = None
-        # Data from selection and background
-        self.scn_data = None
-        # Color models
+        # Color Model
         self.color_model = None
         # Selected points
         self.slct_points = []
@@ -36,17 +32,6 @@ class ColorDescriptor(object):
         # Kmeans quantization colors
         self.colors = colors
 
-    def patch_extract(self, img):
-        """docstring"""
-
-        if self.selections:
-            for point in self.selections:
-                obj_patch = img[
-                    point[0][1]:point[1][1] + 1, 
-                    point[0][0]:point[1][0] + 1]
-
-                self.obj_data = OBJPatch(obj_patch, point)
-
     def data_extract(self, img):
         """docstring"""
 
@@ -58,11 +43,8 @@ class ColorDescriptor(object):
                 obj_pnts = self.selections[idx]
 
                 # Calculate object dimensions
-                obj_width = obj_pnts[1][0] - obj_pnts[0][0]
-                obj_height = obj_pnts[1][1] - obj_pnts[0][1]
-
-                # Calculate the delta width between object and background limit.
-                delta = op.calc_delta(obj_width, obj_height)
+                obj_w = obj_pnts[1][0] - obj_pnts[0][0]
+                obj_h = obj_pnts[1][1] - obj_pnts[0][1]
 
                 # Extract the scene (object + background) from the image.
                 scn_roi = img[
@@ -88,19 +70,19 @@ class ColorDescriptor(object):
                 # Extract the quantized object patch
                 if qnt_roi is not None:
                     qtnz_obj_patch =  qnt_roi[
-                        self.delta:(self.delta + obj_height),
-                        self.delta:(self.delta + obj_width)
+                        self.delta:(self.delta + obj_h),
+                        self.delta:(self.delta + obj_w)
                     ]
                 else:
                     qtnz_obj_patch = None
 
                 # Extract objects quantized data
                 patch_data = temp_data[
-                    self.delta:(self.delta + obj_height),
-                    self.delta:(self.delta + obj_width)
+                    self.delta:(self.delta + obj_h),
+                    self.delta:(self.delta + obj_w)
                 ]
 
-                patch_data = patch_data.reshape(obj_width*obj_height)
+                patch_data = patch_data.reshape(obj_w*obj_h)
 
                 # Extract backgrounds quantized data
                 top = temp_data[ :self.delta + 1, : ]

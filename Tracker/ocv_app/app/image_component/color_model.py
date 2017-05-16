@@ -43,8 +43,9 @@ class ColorModel(object):
 
     def set_bitmask_map(self):
         """
-        Set a color value for each pixel depending on it's Log Likelihood Ratio (LLR) 
-        and set a bitmask_map image of these colors in the object model.
+        Set a color value for each pixel depending on it's 
+        Log Likelihood Ratio (LLR) and set a bitmask_map 
+        image of these colors in the object model.
         :return:
         """
 
