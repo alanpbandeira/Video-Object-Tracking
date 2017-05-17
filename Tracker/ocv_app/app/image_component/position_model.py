@@ -31,7 +31,8 @@ class PositionModel(Object):
 
     
     def set_bitmask_map(self):
-        
+        """dosctring"""
+
         t = 0.08
         mask_data = []
 

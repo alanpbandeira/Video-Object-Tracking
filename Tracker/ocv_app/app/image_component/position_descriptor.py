@@ -59,13 +59,43 @@ class PositionDescriptor(object):
            
             radius = sum(dist_data) / len(dist_data)
 
-            sector_data = []
+            qnt_data = np.array([])
 
             for dist in dist_data:
                 for sec_range in sorted(sectors.keys()):
                     if dist <= sec_range:
-                        sector_data.append(sectors[sec_range])
+                        np.append(sector_data, sectors[sec_range])
 
+            temp_data = qnt_data.reshape(scn_roi.shape[0], scn_roi.shape[1])
+
+            patch_data = temp_data[
+                self.delta:(self.delta + obj_h),
+                self.delta:(self.delta + obj_w)
+            ]
+
+            patch_data = patch_data.reshape(obj_w*obj_h)
+
+            # Extract backgrounds quantized data
+            top = temp_data[ :self.delta + 1, : ]
+            bot = temp_data[ temp_data.shape[0] - self.delta:, :]
+
+            left = temp_data[ 
+                self.delta:temp_data.shape[0] - self.delta + 1, 
+                :self.delta ]
+
+            right = temp_data[ 
+                self.delta:temp_data.shape[0] - self.delta + 1, 
+                temp_data.shape[1] - self.delta: ]
+
+            top = top.reshape(top.shape[0]*top.shape[1])
+            bot = bot.reshape(bot.shape[0]*bot.shape[1])
+            left = left.reshape(left.shape[0]*left.shape[1])
+            right = right.reshape(right.shape[0]*right.shape[1])
+
+            bkgd_data = np.concatenate((top, bot, left, right))
+
+            self.pos_model = PositionModel(
+                radius, obj_pnts, patch_data, bkgd_data)
 
     def set_sectors(self, max_dist):
         """docstring"""
