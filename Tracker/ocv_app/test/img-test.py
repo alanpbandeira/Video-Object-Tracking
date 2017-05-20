@@ -2,11 +2,14 @@ import img_processing as ipro
 import cv2
 import numpy as np
 
-a = [(0.0, 0.0, 49.0)] * 600
-# a = [(250.0, 2.0, 108.0)] * 600
-a = np.array(a)
 
-# cv2.imshow('window', a.reshape(20, 30, 3))
-# cv2.waitKey(0)
+def test(a, b):
+    print (a, b)
+    # return [x + y for x, y in zip(a, b)]
+    return a + b
 
-print(a.reshape(20, 30, 3))
+a = [np.array((5,2)), np.array((2,1))]
+b = np.array((5,2))
+
+vfunc = np.vectorize(test, excluded=['a','b'])
+print(vfunc(a,b))

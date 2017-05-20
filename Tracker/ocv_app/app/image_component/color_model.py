@@ -40,6 +40,7 @@ class ColorModel(object):
         self.set_bitmask_map()
         self.set_rgb_avarage()
         self.centroid = op.bitmask_centroid(self.bitmask_map)
+        self.bitmask_update()
 
     def set_bitmask_map(self):
         """
@@ -73,3 +74,30 @@ class ColorModel(object):
         r = np.mean(self.obj[:,:,2])
 
         self.rgb_avarage = np.mean([r, g, b])
+
+    def bitmask_update(self):
+        """docstring"""
+
+        indices = np.indices((self.obj_dim[0], self.obj_dim[1]))
+        indices = np.transpose(indices)
+        pos_data = sorted([tuple(y) for x in indices for y in x])
+
+        obj_pnts = [
+            point for point in pos_data if np.array_equal(
+                self.bitmask_map[point], np.ones(3))
+            ]
+        dist_data = []
+        for point in obj_pnts:
+            dist_data.append(op.pnt_dist(point, self.centroid))
+
+        radius = sum(dist_data) / len(dist_data)
+        
+        new_obj_pnts = []
+        
+        for x in range(len(obj_pnts)):
+            if dist_data[x] <= radius:
+                new_obj_pnts.append(obj_pnts[x])
+        
+        for point in obj_pnts:
+            if point not in new_obj_pnts:
+                self.bitmask_map[point] = np.zeros(3)

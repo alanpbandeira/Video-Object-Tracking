@@ -97,6 +97,30 @@ class PositionDescriptor(object):
             self.pos_model = PositionModel(
                 radius, obj_pnts, patch_data, bkgd_data)
 
+    def bitmask_update(self, bitmaks, centroid):
+
+        indices = np.indices(scn_roi.shape[0], scn_roi.shape[1])
+        indices = np.transpose(indices)
+        pos_data = sorted([tuple(y) for x in indices for y in x])
+
+        point_dist_data = {}
+        obj_pnts = [
+            point for point in pos_data if np.array_equal(
+                bitmaks[point], np.ones(3))
+            ]
+
+        dist_data = map(op.pnt_dist, obj_pnts)
+        radius = sum(dist_data) / len(dist_data)
+        new_obj_pnts = []
+
+        for x in range(obj_pnts):
+            if dist_data[x] <= radius:
+                new_obj_pnts.append(obj_pnts[x])
+        
+        for point in obj_pnts:
+            if point not in new_obj_pnts:
+                centroid[point] = np.zeros(3)
+
     def set_sectors(self, max_dist):
         """docstring"""
 
@@ -107,5 +131,5 @@ class PositionDescriptor(object):
         for x in range(0, self.bins, -1):
             sectors[sector_range] = x
             sector_range -= delta_sector
-        
-        return sectors
+
+]        return sectors

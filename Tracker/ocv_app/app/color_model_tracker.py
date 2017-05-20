@@ -16,8 +16,8 @@ class Tracker(object):
         self.args = args
         self.frame = None
 
-        self.dscpt = ColorDescriptor(bins=16)
-        # self.dscpt = ColorDescriptor(clusterer="kmeans", colors=16)
+        self.dscpt = ColorDescriptor(bins=8)
+        # self.dscpt = ColorDescriptor(clusterer="kmeans", colors=12)
         # self.dscpt = ColorDescriptor(clusterer="mbkmeans", colors=16)
 
         self.act_hand = ActionHandler(self)
@@ -87,8 +87,8 @@ class Tracker(object):
         # Set tracking camera
         t_camera = cv2.VideoCapture(self.args["video"])
 
-        t_dscpt = ColorDescriptor(bins=16)
-        # t_dscpt = ColorDescriptor(clusterer="kmeans", colors=16)
+        t_dscpt = ColorDescriptor(bins=8)
+        # t_dscpt = ColorDescriptor(clusterer="kmeans", colors=8)
         # t_dscpt = ColorDescriptor(clusterer="mbkmeans", colors=16)
 
         frame_count = 1
