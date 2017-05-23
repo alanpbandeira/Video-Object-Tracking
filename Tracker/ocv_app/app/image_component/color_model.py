@@ -23,24 +23,23 @@ class ScenePatch(object):
 
 class ColorModel(object):
     """docstring for ColorModel"""
-    def __init__(self, obj_features, bkgd_features, n_colors, qtz_obj):
+    def __init__(self, obj_features, bkgd_features, n_colors, obj_d):
         super(ColorModel, self).__init__()
-        self.obj = qtz_obj
         self.obj_features = obj_features
         self.bkgd_features = bkgd_features
-        self.obj_dim = (self.obj.shape[0], self.obj.shape[1])
+        self.obj_d = obj_d
         self.n_colors = n_colors
         self.bitmask_map = None
         self.rgb_avarage = None
 
-        self.bkgd_hist = np.histogram(bkgd_features, n_colors)[0]
-        self.obj_hist = np.histogram(obj_features, n_colors)[0]
+        # self.bkgd_hist = np.histogram(bkgd_features, n_colors)[0]
+        # self.obj_hist = np.histogram(obj_features, n_colors)[0]
+        self.bkgd_hist = np.histogram(bkgd_features, max(bkgd_features))[0]
+        self.obj_hist = np.histogram(obj_features, max(obj_features))[0]
 
         self.llr = op.log_likelihood_ratio(self.obj_hist, self.bkgd_hist, 0.01)
         self.set_bitmask_map()
-        self.set_rgb_avarage()
         self.centroid = op.bitmask_centroid(self.bitmask_map)
-        self.bitmask_update()
 
     def set_bitmask_map(self):
         """
@@ -56,48 +55,12 @@ class ColorModel(object):
         for data in self.obj_features:
             # if data >= len(self.llr):
             #     print(data)
-            if self.llr[data] > t:
-                mask_data.append([1.0, 1.0, 1.0])
+            if self.llr[data-1] > t:
+                mask_data.append(np.ones(3))
             else:
-                mask_data.append([0.0, 0.0, 0.0])
+                mask_data.append(np.zeros(3))
 
         mask_map = np.array(mask_data).reshape(
-            (self.obj_dim[0], self.obj_dim[1], 3))
+            (self.obj_d[0], self.obj_d[1], 3))
 
         self.bitmask_map = mask_map
-
-    def set_rgb_avarage(self):
-        """docstring"""
-
-        b = np.mean(self.obj[:,:,0])
-        g = np.mean(self.obj[:,:,1])
-        r = np.mean(self.obj[:,:,2])
-
-        self.rgb_avarage = np.mean([r, g, b])
-
-    def bitmask_update(self):
-        """docstring"""
-
-        indices = np.indices((self.obj_dim[0], self.obj_dim[1]))
-        indices = np.transpose(indices)
-        pos_data = sorted([tuple(y) for x in indices for y in x])
-
-        obj_pnts = [
-            point for point in pos_data if np.array_equal(
-                self.bitmask_map[point], np.ones(3))
-            ]
-        dist_data = []
-        for point in obj_pnts:
-            dist_data.append(op.pnt_dist(point, self.centroid))
-
-        radius = sum(dist_data) / len(dist_data)
-        
-        new_obj_pnts = []
-        
-        for x in range(len(obj_pnts)):
-            if dist_data[x] <= radius:
-                new_obj_pnts.append(obj_pnts[x])
-        
-        for point in obj_pnts:
-            if point not in new_obj_pnts:
-                self.bitmask_map[point] = np.zeros(3)

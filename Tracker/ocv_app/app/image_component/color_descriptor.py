@@ -26,8 +26,9 @@ class ColorDescriptor(object):
         # Quantization technique
         self.clusterer = clusterer
 
-        # Simple quantization bins
+        # Simple quantization bins and indexes
         self.bins = bins
+        self.qnt_info = None
 
         # Kmeans quantization colors
         self.colors = colors
@@ -45,39 +46,46 @@ class ColorDescriptor(object):
                 # Calculate object dimensions
                 obj_w = obj_pnts[1][0] - obj_pnts[0][0]
                 obj_h = obj_pnts[1][1] - obj_pnts[0][1]
-
+                
                 # Extract the scene (object + background) from the image.
-                scn_roi = img[
-                    scn_pnts[0][1]:scn_pnts[1][1] + 1,
-                    scn_pnts[0][0]:scn_pnts[1][0] + 1
-                ]
+                # scn_roi = qnt_img[
+                #     scn_pnts[0][1]:scn_pnts[1][1] + 1,
+                #     scn_pnts[0][0]:scn_pnts[1][0] + 1
+                # ]
 
                 if self.clusterer == "kmeans":
-                    qnt_roi, qnt_data = ipro.kmeans_qntz(scn_roi, self.colors)
+                    qnt_roi, qnt_data = ipro.kmeans_qntz(img, self.colors)
                 elif self.clusterer == "mbkmeans":
                     qnt_roi, qnt_data = ipro.minibatch_kmeans(
-                        scn_roi, self.colors)
+                        img, self.colors)
                 else:
                     # Generate the quantized scene patch,
                     # its' quantization data and number of colors.
-                    qnt_roi, qnt_data, self.colors = ipro.simple_qntz(
-                        scn_roi, self.bins)
+                    print("here 1")
+                    qnt_img, qnt_data, self.qnt_info = ipro.simple_qntz(
+                        img, self.bins, qnt_info=self.qnt_info)
+
+                    self.colors = max(qnt_data) + 1
+
 
                 # Shape the quantized scene data to scenes shape                
-                temp_data = qnt_data.reshape(
-                    scn_roi.shape[0], scn_roi.shape[1])
+                img_data = qnt_data.reshape(img.shape[0], img.shape[1])
 
                 # Extract the quantized object patch
-                if qnt_roi is not None:
-                    qtnz_obj_patch =  qnt_roi[
-                        self.delta:(self.delta + obj_h),
-                        self.delta:(self.delta + obj_w)
-                    ]
-                else:
-                    qtnz_obj_patch = None
+                # if qnt_roi is not None:
+                #     qtnz_obj_patch =  qnt_roi[
+                #         self.delta:(self.delta + obj_h),
+                #         self.delta:(self.delta + obj_w)
+                #     ]
+                # else:
+                #     qtnz_obj_patch = None
+                scn_data = img_data[
+                    scn_pnts[1][0]:scn_pnts[1][1],
+                    scn_pnts[0][0]:scn_pnts[1][0]
+                ]
 
                 # Extract objects quantized data
-                patch_data = temp_data[
+                patch_data = scn_data[
                     self.delta:(self.delta + obj_h),
                     self.delta:(self.delta + obj_w)
                 ]
@@ -85,16 +93,16 @@ class ColorDescriptor(object):
                 patch_data = patch_data.reshape(obj_w*obj_h)
 
                 # Extract backgrounds quantized data
-                top = temp_data[ :self.delta + 1, : ]
-                bot = temp_data[ temp_data.shape[0] - self.delta:, :]
+                top = scn_data[ :self.delta + 1, : ]
+                bot = scn_data[ scn_data.shape[0] - self.delta:, :]
 
-                left = temp_data[ 
-                    self.delta:temp_data.shape[0] - self.delta + 1, 
+                left = scn_data[ 
+                    self.delta:scn_data.shape[0] - self.delta + 1, 
                     :self.delta ]
 
-                right = temp_data[ 
-                    self.delta:temp_data.shape[0] - self.delta + 1, 
-                    temp_data.shape[1] - self.delta: ]
+                right = scn_data[ 
+                    self.delta:scn_data.shape[0] - self.delta + 1, 
+                    scn_data.shape[1] - self.delta: ]
 
                 top = top.reshape(top.shape[0]*top.shape[1])
                 bot = bot.reshape(bot.shape[0]*bot.shape[1])
@@ -104,4 +112,34 @@ class ColorDescriptor(object):
                 bkgd_data = np.concatenate((top, bot, left, right))
 
                 self.color_model = ColorModel(
-                    patch_data, bkgd_data, self.colors, qtnz_obj_patch)
+                    patch_data, bkgd_data, self.colors, (obj_h, obj_w))
+                
+                obj_patch = img[
+                    obj_pnts[0][1]:obj_pnts[1][1],
+                    obj_pnts[0][0]:obj_pnts[1][0]
+                ]
+
+                self.obj_avcol(obj_patch)
+
+    def obj_avcol(self, obj_patch):
+        """
+        Claculates the detected object avarage rgb color
+        """
+        h = obj_patch.shape[0]
+        w = obj_patch.shape[1]
+        indices = np.transpose(np.indices((h,w)))
+        pos_data = sorted([tuple(y) for x in indices for y in x])
+
+        pixels = []
+
+        for pos in pos_data:
+            if np.array_equal(self.color_model.bitmask_map[pos], np.ones(3)):
+                pixels.append(obj_patch[pos])
+
+        pixels = np.array(pixels)
+        
+        b = np.mean(pixels[:,0])
+        g = np.mean(pixels[:,1])
+        r = np.mean(pixels[:,2])
+
+        self.color_model.rgb_avarage = np.mean([r, g, b])

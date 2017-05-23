@@ -46,7 +46,7 @@ def minibatch_kmeans(image, centroids):
 
     return quant, labels
 
-def simple_qntz(image, bins):
+def simple_qntz(image, bins, qnt_info=None):
     """
     """
     indexes = {}
@@ -54,22 +54,24 @@ def simple_qntz(image, bins):
     nxt_idx = 0
 
     q_range = 256 / bins
-    q_img = image // q_range + 1
-    
-    for y in q_img:
-        for x in y:
-            if indexes.keys():
-                if tuple(x) in indexes.keys():
-                    continue
-    
-            indexes[tuple(x)] = nxt_idx
-            nxt_idx += 1
-    
-    for y in q_img:
-        for x in y:
-            flat_idx.append(indexes[tuple(x)])
-    
-    return q_img, np.array(flat_idx), max(flat_idx)+1
+    q_img = (image // q_range) + 1
 
+    if qnt_info is None:
+        for y in q_img:
+            for x in y:
+                if not indexes.keys() or tuple(x) not in indexes.keys():
+                    indexes[tuple(x)] = nxt_idx
+                    nxt_idx += 1
+    else:
+        indexes = qnt_info
+
+    for y in q_img:
+        for x in y:
+            if tuple(x) not in indexes.keys():
+                indexes[tuple(x)] = max(indexes.values()) + 1
+
+            flat_idx.append(indexes[tuple(x)])
+
+    return q_img, np.array(flat_idx), indexes
 
 

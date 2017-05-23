@@ -16,7 +16,7 @@ class Tracker(object):
         self.args = args
         self.frame = None
 
-        self.dscpt = ColorDescriptor(bins=8)
+        self.dscpt = ColorDescriptor()
         # self.dscpt = ColorDescriptor(clusterer="kmeans", colors=12)
         # self.dscpt = ColorDescriptor(clusterer="mbkmeans", colors=16)
 
@@ -87,7 +87,7 @@ class Tracker(object):
         # Set tracking camera
         t_camera = cv2.VideoCapture(self.args["video"])
 
-        t_dscpt = ColorDescriptor(bins=8)
+        t_dscpt = ColorDescriptor()
         # t_dscpt = ColorDescriptor(clusterer="kmeans", colors=8)
         # t_dscpt = ColorDescriptor(clusterer="mbkmeans", colors=16)
 
@@ -109,6 +109,7 @@ class Tracker(object):
                 t_dscpt.selections = self.dscpt.selections.copy()
                 t_dscpt.bkgd_selections = self.dscpt.bkgd_selections.copy()
                 t_dscpt.delta = self.dscpt.delta
+                t_dscpt.qnt_info = self.dscpt.qnt_info
 
                 p = t_dscpt.slct_points[-2]
                 q = t_dscpt.slct_points[-1]
@@ -126,11 +127,13 @@ class Tracker(object):
                 for x in range(5):
                     if converged:
                         break
+    
+                    t_dscpt.data_extract(t_frame)
 
-                    try:
-                        t_dscpt.data_extract(t_frame)
-                    except:
-                        break
+                    # try:
+                    #     t_dscpt.data_extract(t_frame)
+                    # except:
+                    #     break
 
                     ctd_d = (
                         abs(t_dscpt.color_model.centroid[0] - 
