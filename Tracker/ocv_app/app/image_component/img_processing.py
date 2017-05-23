@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 
+from collections import Counter
 from scipy.cluster.vq import kmeans, vq
 from sklearn.cluster import MiniBatchKMeans
 
@@ -46,32 +47,42 @@ def minibatch_kmeans(image, centroids):
 
     return quant, labels
 
-def simple_qntz(image, bins, qnt_info=None):
+def simple_qntz(image, bins):
     """
     """
-    indexes = {}
-    flat_idx = []
-    nxt_idx = 0
+    # indexes = {}
+    # flat_idx = []
+    # nxt_idx = 0
 
     q_range = 256 / bins
-    q_img = (image // q_range) + 1
+    q_img = (image // q_range)
 
-    if qnt_info is None:
-        for y in q_img:
-            for x in y:
-                if not indexes.keys() or tuple(x) not in indexes.keys():
-                    indexes[tuple(x)] = nxt_idx
-                    nxt_idx += 1
-    else:
-        indexes = qnt_info
+    # if qnt_info is None:
+    #     for y in q_img:
+    #         for x in y:
+    #             if not indexes.keys() or tuple(x) not in indexes.keys():
+    #                 indexes[tuple(x)] = nxt_idx
+    #                 nxt_idx += 1
+    # else:
+    #     indexes = qnt_info
 
-    for y in q_img:
-        for x in y:
-            if tuple(x) not in indexes.keys():
-                indexes[tuple(x)] = max(indexes.values()) + 1
+    # for y in q_img:
+    #     for x in y:
+    #         if tuple(x) not in indexes.keys():
+    #             indexes[tuple(x)] = max(indexes.values()) + 1
 
-            flat_idx.append(indexes[tuple(x)])
+    #         flat_idx.append(indexes[tuple(x)])
 
-    return q_img, np.array(flat_idx), indexes
+    return q_img
+
+def color_histogram(pixels, bins):
+    hist = np.zeros((bins, bins, bins))
+
+    for pixel in pixels:
+        hist[pixel] = hist[pixel] + 1
+
+    return hist
+
+
 
 

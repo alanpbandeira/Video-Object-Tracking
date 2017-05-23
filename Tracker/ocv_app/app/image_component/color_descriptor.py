@@ -62,14 +62,13 @@ class ColorDescriptor(object):
                     # Generate the quantized scene patch,
                     # its' quantization data and number of colors.
                     print("here 1")
-                    qnt_img, qnt_data, self.qnt_info = ipro.simple_qntz(
-                        img, self.bins, qnt_info=self.qnt_info)
+                    qnt_img = ipro.simple_qntz(img, self.bins)
 
-                    self.colors = max(qnt_data) + 1
+                    # self.colors = max(qnt_data) + 1
 
 
                 # Shape the quantized scene data to scenes shape                
-                img_data = qnt_data.reshape(img.shape[0], img.shape[1])
+                # img_data = qnt_data.reshape(img.shape[0], img.shape[1])
 
                 # Extract the quantized object patch
                 # if qnt_roi is not None:
@@ -79,7 +78,7 @@ class ColorDescriptor(object):
                 #     ]
                 # else:
                 #     qtnz_obj_patch = None
-                scn_data = img_data[
+                scn_data = qnt_img[
                     scn_pnts[1][0]:scn_pnts[1][1],
                     scn_pnts[0][0]:scn_pnts[1][0]
                 ]
@@ -90,7 +89,7 @@ class ColorDescriptor(object):
                     self.delta:(self.delta + obj_w)
                 ]
 
-                patch_data = patch_data.reshape(obj_w*obj_h)
+                patch_data = patch_data.reshape((obj_w * obj_h, 3))
 
                 # Extract backgrounds quantized data
                 top = scn_data[ :self.delta + 1, : ]
@@ -104,12 +103,13 @@ class ColorDescriptor(object):
                     self.delta:scn_data.shape[0] - self.delta + 1, 
                     scn_data.shape[1] - self.delta: ]
 
-                top = top.reshape(top.shape[0]*top.shape[1])
-                bot = bot.reshape(bot.shape[0]*bot.shape[1])
-                left = left.reshape(left.shape[0]*left.shape[1])
-                right = right.reshape(right.shape[0]*right.shape[1])
+                top = top.reshape((top.shape[0] * top.shape[1], 3))
+                bot = bot.reshape((bot.shape[0] * bot.shape[1], 3))
+                left = left.reshape((left.shape[0] * left.shape[1], 3))
+                right = right.reshape((right.shape[0] * right.shape[1], 3))
 
-                bkgd_data = np.concatenate((top, bot, left, right))
+                # bkgd_data = np.concatenate((top, bot, left, right))
+                bkgd_data = np.vstack((top, bot, left, right))
 
                 self.color_model = ColorModel(
                     patch_data, bkgd_data, self.colors, (obj_h, obj_w))

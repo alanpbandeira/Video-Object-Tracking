@@ -44,13 +44,15 @@ def calc_delta(width, height):
 def log_likelihood_ratio(obj_hist, bkgd_hist, v_error):
     """DocString"""
 
-    llr = []
+    # llr = []
 
-    for x in range(len(obj_hist)):
-        ratio = max([obj_hist[x], v_error]) / max([bkgd_hist[x], v_error])
-        llr.append(math.log(ratio))
+    # for x in range(len(obj_hist)):
+    #     ratio = max([obj_hist[x], v_error]) / max([bkgd_hist[x], v_error])
+    #     llr.append(math.log(ratio))
 
-    return llr
+    # return llr
+    indices = np.transpose(np.indices((obj_hist.shape)))
+    indices = [tupe]
 
 def bitmask_centroid(bitmask_map):
     x_coords = []
