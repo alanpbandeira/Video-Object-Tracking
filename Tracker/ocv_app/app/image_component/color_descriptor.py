@@ -9,7 +9,7 @@ from .color_model import ColorModel
 class ColorDescriptor(object):
     """docstring for ColorDescriptor."""
 
-    def __init__(self, clusterer="simple", bins=8, colors=None):
+    def __init__(self, clusterer="simple", bins=8):
         super(ColorDescriptor, self).__init__()
 
         # Delta width from object rect to bkgd rect
@@ -28,10 +28,6 @@ class ColorDescriptor(object):
 
         # Simple quantization bins and indexes
         self.bins = bins
-        self.qnt_info = None
-
-        # Kmeans quantization colors
-        self.colors = colors
 
     def data_extract(self, img):
         """docstring"""
@@ -54,18 +50,14 @@ class ColorDescriptor(object):
                 # ]
 
                 if self.clusterer == "kmeans":
-                    qnt_roi, qnt_data = ipro.kmeans_qntz(img, self.colors)
+                    qnt_roi, qnt_data = ipro.kmeans_qntz(img, self.bins)
                 elif self.clusterer == "mbkmeans":
                     qnt_roi, qnt_data = ipro.minibatch_kmeans(
-                        img, self.colors)
+                        img, self.bins)
                 else:
                     # Generate the quantized scene patch,
                     # its' quantization data and number of colors.
-                    print("here 1")
                     qnt_img = ipro.simple_qntz(img, self.bins)
-
-                    # self.colors = max(qnt_data) + 1
-
 
                 # Shape the quantized scene data to scenes shape                
                 # img_data = qnt_data.reshape(img.shape[0], img.shape[1])
@@ -112,32 +104,47 @@ class ColorDescriptor(object):
                 bkgd_data = np.vstack((top, bot, left, right))
 
                 self.color_model = ColorModel(
-                    patch_data, bkgd_data, self.colors, (obj_h, obj_w))
-                
-                obj_patch = img[
-                    obj_pnts[0][1]:obj_pnts[1][1],
-                    obj_pnts[0][0]:obj_pnts[1][0]
-                ]
+                    patch_data, bkgd_data, self.bins, (obj_h, obj_w))
 
-                self.obj_avcol(obj_patch)
+                self.obj_avcol(obj_pnts, img)
 
-    def obj_avcol(self, obj_patch):
+    def obj_avcol(self, obj_pnts, img):
         """
         Claculates the detected object avarage rgb color
         """
-        h = obj_patch.shape[0]
-        w = obj_patch.shape[1]
-        indices = np.transpose(np.indices((h,w)))
-        pos_data = sorted([tuple(y) for x in indices for y in x])
 
-        pixels = []
+        # tmp_bm = np.zeros((img.shape[0], img.shape[1], 3))
+        # tmp_bm[
+        #     obj_pnts[0][1]:obj_pnts[1][1],
+        #     obj_pnts[0][0]:obj_pnts[1][0]
+        # ] = self.color_model.bitmask_map[:,:,:]
 
-        for pos in pos_data:
-            if np.array_equal(self.color_model.bitmask_map[pos], np.ones(3)):
-                pixels.append(obj_patch[pos])
+        tmp_bm = np.zeros((img.shape[0], img.shape[1]))
+        tmp_bm[
+            obj_pnts[0][1]:obj_pnts[1][1],
+            obj_pnts[0][0]:obj_pnts[1][0]
+        ] = self.color_model.bitmask[:,:]
 
-        pixels = np.array(pixels)
+        # bm_indices = np.indices((tmp_bm.shape[0], tmp_bm.shape[1]))
+        bm_indices = np.transpose(np.where(tmp_bm == 1))
+        # bm_indices = np.transpose(bm_indices)
+        bm_indices = [tuple(np.int_(x)) for x in bm_indices]
+
+        pixels = [img[idx] for idx in bm_indices]
+
+        pixels = np.vstack(pixels)
         
+        # bitmask_frame = np.zeros((img.shape[0], img.shape[1]))
+        # obj_idx = np.transpose(np.where(obj_patch == 1))
+        # print(len(obj_idx))
+
+        # pos_data = [tuple(np.int_(x)) for x in obj_idx]
+
+        # print(img[pos_data])
+
+        # pixels = img[pos_data]
+        # print(pos_data)
+
         b = np.mean(pixels[:,0])
         g = np.mean(pixels[:,1])
         r = np.mean(pixels[:,2])

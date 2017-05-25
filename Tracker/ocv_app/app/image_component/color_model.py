@@ -1,6 +1,7 @@
 import numpy as np
 
 from ..math_component import operations as op
+from . import img_processing as ipro
 
 class OBJPatch(object):
     """docstring for IMGPatch."""
@@ -30,16 +31,19 @@ class ColorModel(object):
         self.obj_d = obj_d
         self.n_colors = n_colors
         self.bitmask_map = None
+        self.bitmask = None
         self.rgb_avarage = None
 
         # self.bkgd_hist = np.histogram(bkgd_features, n_colors)[0]
         # self.obj_hist = np.histogram(obj_features, n_colors)[0]
-        self.bkgd_hist = np.histogram(bkgd_features, max(bkgd_features))[0]
-        self.obj_hist = np.histogram(obj_features, max(obj_features))[0]
+        # self.bkgd_hist = np.histogram(bkgd_features, max(bkgd_features))[0]
+        # self.obj_hist = np.histogram(obj_features, max(obj_features))[0]
+        self.bkgd_hist = ipro.color_hist(bkgd_features, n_colors)
+        self.obj_hist = ipro.color_hist(obj_features, n_colors)
 
         self.llr = op.log_likelihood_ratio(self.obj_hist, self.bkgd_hist, 0.01)
         self.set_bitmask_map()
-        self.centroid = op.bitmask_centroid(self.bitmask_map)
+        self.centroid = op.bitmask_centroid(self.bitmask)
 
     def set_bitmask_map(self):
         """
@@ -49,18 +53,22 @@ class ColorModel(object):
         :return:
         """
 
-        t = 0.8
-        mask_data = []
+        t = 0.5
+        patch = self.obj_features.reshape((self.obj_d[0], self.obj_d[1], 3))
+        t_idc = np.transpose(np.indices((self.obj_d[0], self.obj_d[1])))
+        idc = [tuple(y) for x in t_idc for y in x]
+        mask_data = np.zeros(
+            (self.obj_d[0], self.obj_d[1], 3))
+        i_bitmask = np.zeros((self.obj_d[0], self.obj_d[1]))
 
-        for data in self.obj_features:
+        colors = [tuple(np.int_(x)) for x in self.obj_features]
+
+        for i in idc:
             # if data >= len(self.llr):
             #     print(data)
-            if self.llr[data-1] > t:
-                mask_data.append(np.ones(3))
-            else:
-                mask_data.append(np.zeros(3))
+            if self.llr[tuple(np.int_(patch[i]))] > t:
+                mask_data[i] = np.ones(3)
+                i_bitmask[i] = 1
 
-        mask_map = np.array(mask_data).reshape(
-            (self.obj_d[0], self.obj_d[1], 3))
-
-        self.bitmask_map = mask_map
+        self.bitmask_map = mask_data
+        self.bitmask = i_bitmask

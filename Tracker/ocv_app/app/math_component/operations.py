@@ -51,25 +51,38 @@ def log_likelihood_ratio(obj_hist, bkgd_hist, v_error):
     #     llr.append(math.log(ratio))
 
     # return llr
-    indices = np.transpose(np.indices((obj_hist.shape)))
-    indices = [tupe]
+
+    idx = np.transpose(np.where(obj_hist == 0))
+    z_idx = [tuple(np.int_(x)) for x in idx]
+    for idx in z_idx:
+        obj_hist[idx] = v_error
+
+    idx = np.transpose(np.where(bkgd_hist == 0))
+    z_idx = [tuple(np.int_(x)) for x in idx]
+    for idx in z_idx:
+        bkgd_hist[idx] = v_error
+
+    return np.log(np.divide(obj_hist, bkgd_hist))
 
 def bitmask_centroid(bitmask_map):
-    x_coords = []
-    y_coords = []
+    # x_coords = []
+    # y_coords = []
 
-    for y in range(bitmask_map.shape[0]):
-        for x in range(bitmask_map.shape[1]):
-            if np.array_equal(bitmask_map[y][x], [1.0, 1.0, 1.0]):
-                x_coords.append(x)
-                y_coords.append(y)
-            else:
-                continue
+    # for y in range(bitmask_map.shape[0]):
+    #     for x in range(bitmask_map.shape[1]):
+    #         if np.array_equal(bitmask_map[y][x], [1.0, 1.0, 1.0]):
+    #             x_coords.append(x)
+    #             y_coords.append(y)
+    #         else:
+    #             continue
                 
-    cent_x = math.ceil(sum(x_coords)/len(x_coords))
-    cent_y = math.ceil(sum(y_coords)/len(y_coords))
+    # cent_x = math.ceil(sum(x_coords)/len(x_coords))
+    # cent_y = math.ceil(sum(y_coords)/len(y_coords))
 
-    return cent_x, cent_y
+    obj_idx = np.transpose(np.where(bitmask_map == 1))
+
+    # return cent_x, cent_y
+    return tuple(np.int_(sum(obj_idx) // len(obj_idx)))
 
 def pnt_dist(p_one, p_two):
     return np.ceil(

@@ -75,8 +75,10 @@ def simple_qntz(image, bins):
 
     return q_img
 
-def color_histogram(pixels, bins):
+def color_hist(pixels, bins):
     hist = np.zeros((bins, bins, bins))
+
+    pixels = [tuple(np.int_(x)) for x in pixels]
 
     for pixel in pixels:
         hist[pixel] = hist[pixel] + 1
