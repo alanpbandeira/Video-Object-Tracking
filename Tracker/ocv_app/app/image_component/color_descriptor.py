@@ -42,12 +42,6 @@ class ColorDescriptor(object):
                 # Calculate object dimensions
                 obj_w = obj_pnts[1][0] - obj_pnts[0][0]
                 obj_h = obj_pnts[1][1] - obj_pnts[0][1]
-                
-                # Extract the scene (object + background) from the image.
-                # scn_roi = qnt_img[
-                #     scn_pnts[0][1]:scn_pnts[1][1] + 1,
-                #     scn_pnts[0][0]:scn_pnts[1][0] + 1
-                # ]
 
                 if self.clusterer == "kmeans":
                     qnt_roi, qnt_data = ipro.kmeans_qntz(img, self.bins)
@@ -59,20 +53,9 @@ class ColorDescriptor(object):
                     # its' quantization data and number of colors.
                     qnt_img = ipro.simple_qntz(img, self.bins)
 
-                # Shape the quantized scene data to scenes shape                
-                # img_data = qnt_data.reshape(img.shape[0], img.shape[1])
-
-                # Extract the quantized object patch
-                # if qnt_roi is not None:
-                #     qtnz_obj_patch =  qnt_roi[
-                #         self.delta:(self.delta + obj_h),
-                #         self.delta:(self.delta + obj_w)
-                #     ]
-                # else:
-                #     qtnz_obj_patch = None
                 scn_data = qnt_img[
-                    scn_pnts[1][0]:scn_pnts[1][1],
-                    scn_pnts[0][0]:scn_pnts[1][0]
+                    scn_pnts[0][1]:scn_pnts[1][1] + 1,
+                    scn_pnts[0][0]:scn_pnts[1][0] + 1
                 ]
 
                 # Extract objects quantized data
@@ -113,37 +96,18 @@ class ColorDescriptor(object):
         Claculates the detected object avarage rgb color
         """
 
-        # tmp_bm = np.zeros((img.shape[0], img.shape[1], 3))
-        # tmp_bm[
-        #     obj_pnts[0][1]:obj_pnts[1][1],
-        #     obj_pnts[0][0]:obj_pnts[1][0]
-        # ] = self.color_model.bitmask_map[:,:,:]
-
         tmp_bm = np.zeros((img.shape[0], img.shape[1]))
         tmp_bm[
             obj_pnts[0][1]:obj_pnts[1][1],
             obj_pnts[0][0]:obj_pnts[1][0]
         ] = self.color_model.bitmask[:,:]
 
-        # bm_indices = np.indices((tmp_bm.shape[0], tmp_bm.shape[1]))
         bm_indices = np.transpose(np.where(tmp_bm == 1))
-        # bm_indices = np.transpose(bm_indices)
         bm_indices = [tuple(np.int_(x)) for x in bm_indices]
 
         pixels = [img[idx] for idx in bm_indices]
 
         pixels = np.vstack(pixels)
-        
-        # bitmask_frame = np.zeros((img.shape[0], img.shape[1]))
-        # obj_idx = np.transpose(np.where(obj_patch == 1))
-        # print(len(obj_idx))
-
-        # pos_data = [tuple(np.int_(x)) for x in obj_idx]
-
-        # print(img[pos_data])
-
-        # pixels = img[pos_data]
-        # print(pos_data)
 
         b = np.mean(pixels[:,0])
         g = np.mean(pixels[:,1])

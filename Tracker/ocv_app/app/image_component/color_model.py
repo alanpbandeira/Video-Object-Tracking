@@ -30,19 +30,16 @@ class ColorModel(object):
         self.bkgd_features = bkgd_features
         self.obj_d = obj_d
         self.n_colors = n_colors
-        self.bitmask_map = None
-        self.bitmask = None
         self.rgb_avarage = None
 
-        # self.bkgd_hist = np.histogram(bkgd_features, n_colors)[0]
-        # self.obj_hist = np.histogram(obj_features, n_colors)[0]
-        # self.bkgd_hist = np.histogram(bkgd_features, max(bkgd_features))[0]
-        # self.obj_hist = np.histogram(obj_features, max(obj_features))[0]
         self.bkgd_hist = ipro.color_hist(bkgd_features, n_colors)
         self.obj_hist = ipro.color_hist(obj_features, n_colors)
 
         self.llr = op.log_likelihood_ratio(self.obj_hist, self.bkgd_hist, 0.01)
-        self.set_bitmask_map()
+
+        self.bitmask_map, self.bitmask = ipro.set_bitmask_map(
+            self.obj_features, self.llr, self.obj_d)
+
         self.centroid = op.bitmask_centroid(self.bitmask)
 
     def set_bitmask_map(self):

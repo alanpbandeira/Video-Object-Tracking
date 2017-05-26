@@ -48,34 +48,14 @@ def minibatch_kmeans(image, centroids):
     return quant, labels
 
 def simple_qntz(image, bins):
-    """
-    """
-    # indexes = {}
-    # flat_idx = []
-    # nxt_idx = 0
-
+    """docstring"""
     q_range = 256 / bins
     q_img = (image // q_range)
-
-    # if qnt_info is None:
-    #     for y in q_img:
-    #         for x in y:
-    #             if not indexes.keys() or tuple(x) not in indexes.keys():
-    #                 indexes[tuple(x)] = nxt_idx
-    #                 nxt_idx += 1
-    # else:
-    #     indexes = qnt_info
-
-    # for y in q_img:
-    #     for x in y:
-    #         if tuple(x) not in indexes.keys():
-    #             indexes[tuple(x)] = max(indexes.values()) + 1
-
-    #         flat_idx.append(indexes[tuple(x)])
 
     return q_img
 
 def color_hist(pixels, bins):
+    """docstring"""
     hist = np.zeros((bins, bins, bins))
 
     pixels = [tuple(np.int_(x)) for x in pixels]
@@ -84,6 +64,25 @@ def color_hist(pixels, bins):
         hist[pixel] = hist[pixel] + 1
 
     return hist
+
+def set_bitmask_map(obj_data, llr, obj_d):
+    """docstring"""
+
+    t = 0.8
+    patch = obj_data.reshape((obj_d[0], obj_d[1], 3))
+    t_idc = np.transpose(np.indices((obj_d[0], obj_d[1])))
+    idc = sorted([tuple(y) for x in t_idc for y in x])
+    mask_data = np.zeros((obj_d[0], obj_d[1], 3))
+    i_bitmask = np.zeros((obj_d[0], obj_d[1]))
+
+    colors = [tuple(np.int_(x)) for x in obj_data]
+
+    for i in idc:
+        if llr[tuple(np.int_(patch[i]))] > t:
+            mask_data[i] = np.ones(3)
+            i_bitmask[i] = 1
+
+    return mask_data, i_bitmask
 
 
 

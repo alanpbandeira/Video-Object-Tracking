@@ -44,14 +44,6 @@ def calc_delta(width, height):
 def log_likelihood_ratio(obj_hist, bkgd_hist, v_error):
     """DocString"""
 
-    # llr = []
-
-    # for x in range(len(obj_hist)):
-    #     ratio = max([obj_hist[x], v_error]) / max([bkgd_hist[x], v_error])
-    #     llr.append(math.log(ratio))
-
-    # return llr
-
     idx = np.transpose(np.where(obj_hist == 0))
     z_idx = [tuple(np.int_(x)) for x in idx]
     for idx in z_idx:
@@ -61,27 +53,17 @@ def log_likelihood_ratio(obj_hist, bkgd_hist, v_error):
     z_idx = [tuple(np.int_(x)) for x in idx]
     for idx in z_idx:
         bkgd_hist[idx] = v_error
+    
+    div = np.divide(obj_hist, bkgd_hist)
+    log = np.log(div)
 
-    return np.log(np.divide(obj_hist, bkgd_hist))
+    return log
 
 def bitmask_centroid(bitmask_map):
-    # x_coords = []
-    # y_coords = []
-
-    # for y in range(bitmask_map.shape[0]):
-    #     for x in range(bitmask_map.shape[1]):
-    #         if np.array_equal(bitmask_map[y][x], [1.0, 1.0, 1.0]):
-    #             x_coords.append(x)
-    #             y_coords.append(y)
-    #         else:
-    #             continue
-                
-    # cent_x = math.ceil(sum(x_coords)/len(x_coords))
-    # cent_y = math.ceil(sum(y_coords)/len(y_coords))
+    """docstring"""
 
     obj_idx = np.transpose(np.where(bitmask_map == 1))
 
-    # return cent_x, cent_y
     return tuple(np.int_(sum(obj_idx) // len(obj_idx)))
 
 def pnt_dist(p_one, p_two):

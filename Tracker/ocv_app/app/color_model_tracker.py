@@ -16,7 +16,7 @@ class Tracker(object):
         self.args = args
         self.frame = None
 
-        self.dscpt = ColorDescriptor()
+        self.dscpt = ColorDescriptor(bins=16)
         # self.dscpt = ColorDescriptor(clusterer="kmeans")
         # self.dscpt = ColorDescriptor(clusterer="mbkmeans")
 
@@ -88,7 +88,7 @@ class Tracker(object):
         # Set tracking camera
         t_camera = cv2.VideoCapture(self.args["video"])
 
-        t_dscpt = ColorDescriptor()
+        t_dscpt = ColorDescriptor(bins=16)
         # t_dscpt = ColorDescriptor(clusterer="kmeans")
         # t_dscpt = ColorDescriptor(clusterer="mbkmeans")
 
@@ -124,23 +124,24 @@ class Tracker(object):
                 converged = False
 
                 # while not converged:
-                for x in range(10):
+                for x in range(5):
                     if converged:
                         break
-    
-                    t_dscpt.data_extract(t_frame)
 
-                    # try:
-                    #     t_dscpt.data_extract(t_frame)
-                    # except:
-                    #     break
+                    # t_dscpt.data_extract(t_frame)
+
+                    try:
+                        t_dscpt.data_extract(t_frame)
+                    except:
+                        break
 
                     ctd_d = (
-                        abs(t_dscpt.color_model.centroid[0] - 
-                            self.dscpt.color_model.centroid[0]),
 
                         abs(t_dscpt.color_model.centroid[1] - 
                             self.dscpt.color_model.centroid[1]),
+
+                        abs(t_dscpt.color_model.centroid[0] - 
+                            self.dscpt.color_model.centroid[0])
                     )
 
                     if (ctd_d[0] <= 5 and ctd_d[1] <=5):
@@ -180,8 +181,9 @@ class Tracker(object):
                     view_frame, slct_idx[0], slct_idx[1], 
                     ((255, 0, 0)), 1)
                 
-                if self.model_update(t_dscpt, (0.05*256)):
-                    print("updated", frame_count)
+                # if self.model_update(t_dscpt, (0.05*256)):
+                # if self.model_update(t_dscpt, 50):
+                #     print("updated", frame_count)
 
             cv2.imshow('tracker', view_frame)
 
@@ -211,13 +213,13 @@ class Tracker(object):
 
     def center_selection(self, new_cent, selections):
         """docstring"""
-        d_top = self.dscpt.color_model.centroid[1] - selections[0][0][1]
-        d_bot = selections[0][1][1] - self.dscpt.color_model.centroid[1]
+        d_top = self.dscpt.color_model.centroid[0] - selections[0][0][1]
+        d_bot = selections[0][1][1] - self.dscpt.color_model.centroid[0]
 
-        d_left = self.dscpt.color_model.centroid[0] - selections[0][0][0]
-        d_right = selections[0][1][0] - self.dscpt.color_model.centroid[0]
+        d_left = self.dscpt.color_model.centroid[1] - selections[0][0][0]
+        d_right = selections[0][1][0] - self.dscpt.color_model.centroid[1]
 
-        top_idx = new_cent[0] - d_left, new_cent[1] - d_top
-        bot_idx = new_cent[0] + d_right, new_cent[1] + d_bot
+        top_idx = new_cent[1] - d_left, new_cent[0] - d_top
+        bot_idx = new_cent[1] + d_right, new_cent[0] + d_bot
 
         return top_idx, bot_idx
