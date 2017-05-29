@@ -125,9 +125,6 @@ class Tracker(object):
 
                 # while not converged:
                 for x in range(5):
-                    if converged:
-                        break
-
                     # t_dscpt.data_extract(t_frame)
 
                     try:
@@ -170,6 +167,9 @@ class Tracker(object):
 
                         t_dscpt.bkgd_selections = [bkgd_selections]
 
+                    if converged:
+                        break
+
                 p = t_dscpt.slct_points[-2]
                 q = t_dscpt.slct_points[-1]
 
@@ -180,10 +180,10 @@ class Tracker(object):
                 cv2.rectangle(
                     view_frame, slct_idx[0], slct_idx[1], 
                     ((255, 0, 0)), 1)
-                
-                # if self.model_update(t_dscpt, (0.05*256)):
-                # if self.model_update(t_dscpt, 50):
-                #     print("updated", frame_count)
+
+            # if self.model_update(t_dscpt, (0.05*256)):
+            # # if self.model_update(t_dscpt, 50):
+            #     print("updated", frame_count)
 
             cv2.imshow('tracker', view_frame)
 
