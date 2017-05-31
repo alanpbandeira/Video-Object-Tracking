@@ -32,8 +32,8 @@ class ColorModel(object):
         self.n_colors = n_colors
         self.rgb_avarage = None
 
-        self.bkgd_hist = ipro.color_hist(bkgd_features, n_colors)
-        self.obj_hist = ipro.color_hist(obj_features, n_colors)
+        self.bkgd_hist = ipro.nd_hist(3, n_colors, bkgd_features)
+        self.obj_hist = ipro.nd_hist(3, n_colors, obj_features)
 
         self.llr = op.log_likelihood_ratio(self.obj_hist, self.bkgd_hist, 0.01)
 
@@ -41,31 +41,3 @@ class ColorModel(object):
             self.obj_features, self.llr, self.obj_d)
 
         self.centroid = op.bitmask_centroid(self.bitmask)
-
-    def set_bitmask_map(self):
-        """
-        Set a color value for each pixel depending on it's 
-        Log Likelihood Ratio (LLR) and set a bitmask_map 
-        image of these colors in the object model.
-        :return:
-        """
-
-        t = 0.5
-        patch = self.obj_features.reshape((self.obj_d[0], self.obj_d[1], 3))
-        t_idc = np.transpose(np.indices((self.obj_d[0], self.obj_d[1])))
-        idc = [tuple(y) for x in t_idc for y in x]
-        mask_data = np.zeros(
-            (self.obj_d[0], self.obj_d[1], 3))
-        i_bitmask = np.zeros((self.obj_d[0], self.obj_d[1]))
-
-        colors = [tuple(np.int_(x)) for x in self.obj_features]
-
-        for i in idc:
-            # if data >= len(self.llr):
-            #     print(data)
-            if self.llr[tuple(np.int_(patch[i]))] > t:
-                mask_data[i] = np.ones(3)
-                i_bitmask[i] = 1
-
-        self.bitmask_map = mask_data
-        self.bitmask = i_bitmask

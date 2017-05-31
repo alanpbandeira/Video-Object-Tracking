@@ -7,7 +7,6 @@ class PositionModel(Object):
 
     def __init__(self, obj_features, bkgd_feature):
         super(PositionModel, self).__init__()
-
         self.obj_features = obj_features
         self.bkgd_features = bkgd_feature
 

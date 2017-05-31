@@ -6,7 +6,3 @@ class CPModel(object):
         super(CPModel, self).__init__()
         self.llr = llr
         self.bitmask_map = None
-
-
-    def set_bitmask():
-        pass

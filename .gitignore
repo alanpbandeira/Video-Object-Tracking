@@ -5,6 +5,7 @@
 /Tracker/ocv_app/.vscode
 /Tracker/.vscode
 /Tracker/.idea
+/.vscode
 
 # Exclude python cache
 /Tracker/ocv_app/__pycache__

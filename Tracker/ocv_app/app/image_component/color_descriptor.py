@@ -35,7 +35,7 @@ class ColorDescriptor(object):
         if self.selections:
             for idx in range(len(self.bkgd_selections)):
                 # Points enclosing background and object patch.
-                # Points enclosing object patch. 
+                # Points enclosing object patch.
                 scn_pnts = self.bkgd_selections[idx]
                 obj_pnts = self.selections[idx]
 
@@ -51,7 +51,7 @@ class ColorDescriptor(object):
                 else:
                     # Generate the quantized scene patch,
                     # its' quantization data and number of colors.
-                    qnt_img = ipro.simple_qntz(img, self.bins)
+                    qnt_img = ipro.simple_qntz(256, self.bins, img)
 
                 scn_data = qnt_img[
                     scn_pnts[0][1]:scn_pnts[1][1] + 1,
@@ -70,12 +70,12 @@ class ColorDescriptor(object):
                 top = scn_data[ :self.delta + 1, : ]
                 bot = scn_data[ scn_data.shape[0] - self.delta:, :]
 
-                left = scn_data[ 
-                    self.delta:scn_data.shape[0] - self.delta + 1, 
+                left = scn_data[
+                    self.delta:scn_data.shape[0] - self.delta + 1,
                     :self.delta ]
 
-                right = scn_data[ 
-                    self.delta:scn_data.shape[0] - self.delta + 1, 
+                right = scn_data[
+                    self.delta:scn_data.shape[0] - self.delta + 1,
                     scn_data.shape[1] - self.delta: ]
 
                 top = top.reshape((top.shape[0] * top.shape[1], 3))

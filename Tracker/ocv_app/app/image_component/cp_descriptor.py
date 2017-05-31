@@ -9,7 +9,7 @@ from .cp_model import CPModel
 
 class CPDescriptor(object):
     """docstring for PositionDescriptor"""
-    
+
     def __init__(self, clusterer="simple", bins=8, colors=None):
         super(PositionDescriptor, self).__init__()
 
@@ -34,7 +34,7 @@ class CPDescriptor(object):
     def data_extract(self, img):
         for idx in range(len(self.bkgd_selections)):
             # Points enclosing background and object patch.
-            # Points enclosing object patch. 
+            # Points enclosing object patch.
             scn_pnts = self.bkgd_selections[idx]
             obj_pnts = self.selections[idx]
 
@@ -80,12 +80,12 @@ class CPDescriptor(object):
         top = temp_data[ :self.delta + 1, : ]
         bot = temp_data[ temp_data.shape[0] - self.delta:, :]
 
-        left = temp_data[ 
-            self.delta:temp_data.shape[0] - self.delta + 1, 
+        left = temp_data[
+            self.delta:temp_data.shape[0] - self.delta + 1,
             :self.delta ]
 
-        right = temp_data[ 
-            self.delta:temp_data.shape[0] - self.delta + 1, 
+        right = temp_data[
+            self.delta:temp_data.shape[0] - self.delta + 1,
             temp_data.shape[1] - self.delta: ]
 
         top = top.reshape(top.shape[0]*top.shape[1])
@@ -135,12 +135,12 @@ class CPDescriptor(object):
         top = temp_data[ :self.delta + 1, : ]
         bot = temp_data[ temp_data.shape[0] - self.delta:, :]
 
-        left = temp_data[ 
-            self.delta:temp_data.shape[0] - self.delta + 1, 
+        left = temp_data[
+            self.delta:temp_data.shape[0] - self.delta + 1,
             :self.delta ]
 
-        right = temp_data[ 
-            self.delta:temp_data.shape[0] - self.delta + 1, 
+        right = temp_data[
+            self.delta:temp_data.shape[0] - self.delta + 1,
             temp_data.shape[1] - self.delta: ]
 
         top = top.reshape(top.shape[0]*top.shape[1])
