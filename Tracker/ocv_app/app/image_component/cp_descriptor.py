@@ -59,7 +59,22 @@ class CPDescriptor(object):
             obj_distances, bkgd_distances = self.postion_features(
                 scn_d, obj_d, self.color_model.centroid)
 
-            # TODO build Color-Position Model
+            obj_qnt_dist = self.postion_indexation(obj_distances)
+            bkgd_qnt_dist = self.postion_indexation(obj_distances)
+
+            cp_obj = []
+            for i in range(len(self.color_model.obj_features)):
+                cp_obj.append(
+                    np.append(
+                        (self.color_model.obj_features[i], obj_qnt_dist[i])))
+
+            cp_bkgd = []
+            for i in range(len(self.color_model.bkgd_features)):
+                cp_obj.append(
+                    np.append(
+                        (self.color_model.bkgd_features[i], bkgd_qnt_dist[i])))
+
+                                    
 
     def postion_features(self, scn_d, obj_d, centroid):
         """docstring"""
@@ -181,6 +196,7 @@ class CPDescriptor(object):
         self.color_model.rgb_avarage = np.mean([r, g, b])
 
     def postion_indexation(self, scn_dist):
+        """docstring"""
         upper_bound = max(data_dist)
         delta_d = upper_bound / self.bins
 
