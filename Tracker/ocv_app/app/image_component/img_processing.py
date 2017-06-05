@@ -89,3 +89,9 @@ def set_bitmask_map(obj_data, llr, obj_d):
             i_bitmask[i] = 1
 
     return mask_data, i_bitmask
+
+def get_img_idx(matrix_shape):
+    """docstring"""
+    indices = np.indices(matrix_shape)
+    indices = np.transpose(indices)
+    return sorted([tuple(y) for x in indices for y in x])

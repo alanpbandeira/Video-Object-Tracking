@@ -53,7 +53,7 @@ def log_likelihood_ratio(obj_hist, bkgd_hist, v_error):
     z_idx = [tuple(np.int_(x)) for x in idx]
     for idx in z_idx:
         bkgd_hist[idx] = v_error
-    
+
     div = np.divide(obj_hist, bkgd_hist)
     log = np.log(div)
 
@@ -67,5 +67,6 @@ def bitmask_centroid(bitmask_map):
     return tuple(np.int_(sum(obj_idx) // len(obj_idx)))
 
 def pnt_dist(p_one, p_two):
+    """dosctring"""
     return np.ceil(
         np.sqrt(sum([np.power((a-b), 2) for a, b in zip(p_one, p_two)])))
