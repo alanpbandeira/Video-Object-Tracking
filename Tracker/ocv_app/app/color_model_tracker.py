@@ -16,7 +16,7 @@ class Tracker(object):
         self.args = args
         self.frame = None
 
-        self.dscpt = ColorDescriptor(bins=16)
+        self.dscpt = ColorDescriptor(bins=8)
         # self.dscpt = ColorDescriptor(clusterer="kmeans")
         # self.dscpt = ColorDescriptor(clusterer="mbkmeans")
 
@@ -26,8 +26,8 @@ class Tracker(object):
         self.video_switch = False
 
         cv2.namedWindow('window')
-        cv2.namedWindow('tracker')
-        cv2.namedWindow('bitmask')
+        # cv2.namedWindow('tracker')
+        # cv2.namedWindow('bitmask')
 
     def run(self):
         if not self.args.get("video", False):
@@ -88,11 +88,14 @@ class Tracker(object):
         # Set tracking camera
         t_camera = cv2.VideoCapture(self.args["video"])
 
-        t_dscpt = ColorDescriptor(bins=16)
+        t_dscpt = ColorDescriptor(bins=8)
         # t_dscpt = ColorDescriptor(clusterer="kmeans")
         # t_dscpt = ColorDescriptor(clusterer="mbkmeans")
 
         frame_count = 1
+
+        fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+        out = cv2.VideoWriter('output.avi', fourcc, 20.0, (self.frame.shape[1], self.frame.shape[0]))
 
         while True:
             (grabbed, t_frame) = t_camera.read()
@@ -185,10 +188,11 @@ class Tracker(object):
             # # if self.model_update(t_dscpt, 50):
             #     print("updated", frame_count)
 
-            cv2.imshow('tracker', view_frame)
+            # cv2.imshow('tracker', view_frame)
+            out.write(view_frame)
 
-            if frame_count != 1:
-                cv2.imshow('bitmask', t_dscpt.color_model.bitmask_map)
+            # if frame_count != 1:
+            #     cv2.imshow('bitmask', t_dscpt.color_model.bitmask_map)
 
             frame_count +=1
 
