@@ -1,5 +1,6 @@
 # Exclude your personal dataset from repository
 /resources
+/Tracker/ocv_app/output.avi
 
 # Exclude visual studio code metadata
 /Tracker/ocv_app/.vscode

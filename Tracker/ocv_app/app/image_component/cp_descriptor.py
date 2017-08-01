@@ -10,7 +10,7 @@ class CPDescriptor(object):
     """docstring for PositionDescriptor"""
 
     def __init__(self, clusterer="simple", bins=8, colors=None):
-        super(PositionDescriptor, self).__init__()
+        super(CPDescriptor, self).__init__()
 
         # Delta width from object rect to bkgd rect
         self.delta = None
@@ -18,6 +18,8 @@ class CPDescriptor(object):
         self.color_model = None
         # Color Position models
         self.cp_model = None
+        # Selected points
+        self.slct_points = []
         # Patch selected regions (points)
         self.selections = []
         # Patch selected regions with background (points)
@@ -73,6 +75,8 @@ class CPDescriptor(object):
                 cp_obj.append(
                     np.append(
                         (self.color_model.bkgd_features[i], bkgd_qnt_dist[i])))
+
+            self.cp_model = CPModel(np.array(cp_obj), np.array(cp_bkgd), self.bins, obj_d)
 
                                     
 
@@ -201,7 +205,7 @@ class CPDescriptor(object):
         delta_d = upper_bound / self.bins
 
         indexes = list(range(self.bins))
-        ranges = [delta_d * (i+1)) for i in indexes]
+        ranges = [delta_d * (i+1) for i in indexes]
         qnt_id = dict(zip(ranges, indexes))
 
         idx_data = [qnt_id[r] for d in scn_dist for r in ranges if d <= r]

@@ -4,6 +4,7 @@ import numpy as np
 
 from .image_component import img_processing as ipro
 from .image_component.color_descriptor import ColorDescriptor
+from .image_component.cp_descriptor import CPDescriptor
 from .actions import ActionHandler
 from .math_component import operations as op
 
@@ -16,7 +17,8 @@ class Tracker(object):
         self.args = args
         self.frame = None
 
-        self.dscpt = ColorDescriptor(bins=8)
+        # self.dscpt = ColorDescriptor(bins=8)
+        self.dscpt = CPDescriptor(bins=8)
         # self.dscpt = ColorDescriptor(clusterer="kmeans")
         # self.dscpt = ColorDescriptor(clusterer="mbkmeans")
 
@@ -26,8 +28,8 @@ class Tracker(object):
         self.video_switch = False
 
         cv2.namedWindow('window')
-        # cv2.namedWindow('tracker')
-        # cv2.namedWindow('bitmask')
+        cv2.namedWindow('tracker')
+        cv2.namedWindow('bitmask')
 
     def run(self):
         if not self.args.get("video", False):
@@ -61,13 +63,6 @@ class Tracker(object):
                 cv2.setMouseCallback('window', self.act_hand.point_mark)
 
             if key == ord("p"):
-                # try:
-                #     self.dscpt.patch_extract()
-                #     self.dscpt.data_extract()
-                #     print("done")
-                # except:
-                #     print("No object found!")
-
                 self.dscpt.data_extract(self.frame)
                 cv2.imshow('bitmask', self.dscpt.color_model.bitmask_map)
                 print("done")
@@ -88,7 +83,8 @@ class Tracker(object):
         # Set tracking camera
         t_camera = cv2.VideoCapture(self.args["video"])
 
-        t_dscpt = ColorDescriptor(bins=8)
+        # t_dscpt = ColorDescriptor(bins=8)
+        t_dscpt = CPDescriptor(bins=8)
         # t_dscpt = ColorDescriptor(clusterer="kmeans")
         # t_dscpt = ColorDescriptor(clusterer="mbkmeans")
 
@@ -136,7 +132,6 @@ class Tracker(object):
                         break
 
                     ctd_d = (
-
                         abs(t_dscpt.color_model.centroid[1] - 
                             self.dscpt.color_model.centroid[1]),
 
@@ -184,15 +179,15 @@ class Tracker(object):
                     view_frame, slct_idx[0], slct_idx[1], 
                     ((255, 0, 0)), 1)
 
-            # if self.model_update(t_dscpt, (0.05*256)):
-            # # if self.model_update(t_dscpt, 50):
-            #     print("updated", frame_count)
+            if self.model_update(t_dscpt, (0.05*256)):
+            # if self.model_update(t_dscpt, 50):
+                print("updated", frame_count)
 
-            # cv2.imshow('tracker', view_frame)
-            out.write(view_frame)
+            cv2.imshow('tracker', view_frame)
+            # out.write(view_frame)
 
-            # if frame_count != 1:
-            #     cv2.imshow('bitmask', t_dscpt.color_model.bitmask_map)
+            if frame_count != 1:
+                cv2.imshow('bitmask', t_dscpt.color_model.bitmask_map)
 
             frame_count +=1
 
